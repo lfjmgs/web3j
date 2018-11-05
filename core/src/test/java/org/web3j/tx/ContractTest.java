@@ -1,19 +1,9 @@
 package org.web3j.tx;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.junit.rules.ExpectedException;
-
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
@@ -44,6 +34,13 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.utils.Async;
 import org.web3j.utils.Numeric;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -142,6 +139,15 @@ public class ContractTest extends ManagedTransactionTester {
         assertFalse(contract.isValid());
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testIsValidNoBinThrows() throws Exception {
+        TransactionManager txManager = mock(TransactionManager.class);
+        TestContract contract = new TestContract(
+                Contract.BIN_NOT_PROVIDED, ADDRESS, web3j, txManager,
+                new DefaultGasProvider());
+        contract.isValid();
+    }
+
     @Test(expected = RuntimeException.class)
     public void testDeployInvalidContractAddress() throws Throwable {
         TransactionReceipt transactionReceipt = new TransactionReceipt();
@@ -195,7 +201,7 @@ public class ContractTest extends ManagedTransactionTester {
         prepareCall(ethCall);
 
         assertThat(contract.callMultipleValue().send(),
-                equalTo(Arrays.<Type>asList(
+                equalTo(Arrays.asList(
                         new Uint256(BigInteger.valueOf(55)),
                         new Uint256(BigInteger.valueOf(7)))));
     }
@@ -290,16 +296,11 @@ public class ContractTest extends ManagedTransactionTester {
     public void testInvalidTransactionResponse() throws Throwable {
         prepareNonceRequest();
 
-        final EthSendTransaction ethSendTransaction = new EthSendTransaction();
+        EthSendTransaction ethSendTransaction = new EthSendTransaction();
         ethSendTransaction.setError(new Response.Error(1, "Invalid transaction"));
 
-        Request rawTransactionRequest = mock(Request.class);
-        when(rawTransactionRequest.sendAsync()).thenReturn(Async.run(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                return ethSendTransaction;
-            }
-        }));
+        Request<?, EthSendTransaction> rawTransactionRequest = mock(Request.class);
+        when(rawTransactionRequest.sendAsync()).thenReturn(Async.run(() -> ethSendTransaction));
         when(web3j.ethSendRawTransaction(any(String.class)))
                 .thenReturn((Request) rawTransactionRequest);
 
@@ -346,17 +347,12 @@ public class ContractTest extends ManagedTransactionTester {
         prepareNonceRequest();
         prepareTransactionRequest();
 
-        final EthGetTransactionReceipt ethGetTransactionReceipt = new EthGetTransactionReceipt();
+        EthGetTransactionReceipt ethGetTransactionReceipt = new EthGetTransactionReceipt();
         ethGetTransactionReceipt.setError(new Response.Error(1, "Invalid transaction receipt"));
 
         Request<?, EthGetTransactionReceipt> getTransactionReceiptRequest = mock(Request.class);
         when(getTransactionReceiptRequest.sendAsync())
-                .thenReturn(Async.run(new Callable<EthGetTransactionReceipt>() {
-                    @Override
-                    public EthGetTransactionReceipt call() throws Exception {
-                        return ethGetTransactionReceipt;
-                    }
-                }));
+                .thenReturn(Async.run(() -> ethGetTransactionReceipt));
         when(web3j.ethGetTransactionReceipt(TRANSACTION_HASH))
                 .thenReturn((Request) getTransactionReceiptRequest);
 
@@ -366,9 +362,13 @@ public class ContractTest extends ManagedTransactionTester {
     @Test
     public void testExtractEventParametersWithLogGivenATransactionReceipt() {
 
-        final Event testEvent1 = new Event("TestEvent1", Collections.<TypeReference<?>>emptyList());
+        final Event testEvent1 = new Event(
+                "TestEvent1",
+                Collections.<TypeReference<?>>emptyList());
 
-        final Event testEvent2 = new Event("TestEvent2", Collections.<TypeReference<?>>emptyList());
+        final Event testEvent2 = new Event(
+                "TestEvent2",
+                Collections.<TypeReference<?>>emptyList());
 
         final List<Log> logs = Arrays.asList(
                 new Log(false, "" + 0, "0", "0x0", "0x0", "0", "0x1", "", "",
@@ -458,7 +458,13 @@ public class ContractTest extends ManagedTransactionTester {
                 String contractAddress,
                 Web3j web3j, TransactionManager transactionManager,
                 ContractGasProvider gasProvider) {
-            super(TEST_CONTRACT_BINARY, contractAddress, web3j, transactionManager, gasProvider);
+            this(TEST_CONTRACT_BINARY, contractAddress, web3j, transactionManager, gasProvider);
+        }
+
+        public TestContract(String binary, String contractAddress,
+                            Web3j web3j, TransactionManager transactionManager,
+                            ContractGasProvider gasProvider) {
+            super(binary, contractAddress, web3j, transactionManager, gasProvider);
         }
 
         public RemoteCall<Utf8String> callSingleValue() {

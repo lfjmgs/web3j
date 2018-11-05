@@ -46,9 +46,9 @@ public abstract class Contract extends ManagedTransaction {
      * @deprecated ...
      * @see org.web3j.tx.gas.DefaultGasProvider
      */
-    // https://www.reddit.com/r/ethereum/comments/5g8ia6/attention_miners_we_recommend_raising_gas_limit/
     public static final BigInteger GAS_LIMIT = BigInteger.valueOf(4300000);
 
+    public static final String BIN_NOT_PROVIDED = "Bin file was not provided";
     public static final String FUNC_DEPLOY = "deploy";
 
     protected final String contractBinary;
@@ -160,6 +160,12 @@ public abstract class Contract extends ManagedTransaction {
      * @throws IOException if unable to connect to web3j node
      */
     public boolean isValid() throws IOException {
+        if (contractBinary.equals(BIN_NOT_PROVIDED)) {
+            throw new UnsupportedOperationException(
+                    "Contract binary not present in contract wrapper, "
+                            + "please generate your wrapper using -abiFile=<file>");
+        }
+
         if (contractAddress.equals("")) {
             throw new UnsupportedOperationException(
                     "Contract binary not present, you will need to regenerate your smart "
@@ -212,7 +218,7 @@ public abstract class Contract extends ManagedTransaction {
         org.web3j.protocol.core.methods.response.EthCall ethCall = web3j.ethCall(
                 Transaction.createEthCallTransaction(
                         transactionManager.getFromAddress(), contractAddress, encodedFunction),
-                defaultBlockParameter)
+                DefaultBlockParameterName.LATEST)
                 .send();
 
         String value = ethCall.getValue();
@@ -272,7 +278,7 @@ public abstract class Contract extends ManagedTransaction {
      *
      * @param data  to send in transaction
      * @param weiValue in Wei to send in transaction
-     * @return transaction receipt
+     * @return containing our transaction receipt
      * @throws IOException                 if the call to the node fails
      * @throws TransactionException if the transaction was not mined while waiting
      */
@@ -462,27 +468,36 @@ public abstract class Contract extends ManagedTransaction {
     }
 
     public static <T extends Contract> RemoteCall<T> deployRemoteCall(
-            Class<T> type,
-            Web3j web3j, Credentials credentials,
-            ContractGasProvider contractGasProvider,
-            String binary, String encodedConstructor, BigInteger value) {
-        return deployRemoteCall(
+            final Class<T> type,
+            final Web3j web3j, final Credentials credentials,
+            final ContractGasProvider contractGasProvider,
+            final String binary, final String encodedConstructor, final BigInteger value) {
+        return new RemoteCall<T>(new Callable<T>() {
+            @Override
+            public T call() throws Exception {
+                return deploy(
                         type, web3j, credentials, contractGasProvider, binary,
                         encodedConstructor, value);
-
+            }
+        });
     }
 
     public static <T extends Contract> RemoteCall<T> deployRemoteCall(
-            Class<T> type,
-            Web3j web3j, Credentials credentials,
-            ContractGasProvider contractGasProvider,
-            String binary, String encodedConstructor) {
-        return deployRemoteCall(
+            final Class<T> type,
+            final Web3j web3j, final Credentials credentials,
+            final ContractGasProvider contractGasProvider,
+            final String binary, final String encodedConstructor) {
+        return new RemoteCall<T>(new Callable<T>() {
+            @Override
+            public T call() throws Exception {
+                return deploy(
                         type, web3j, credentials, contractGasProvider, binary,
                         encodedConstructor, BigInteger.ZERO);
             }
+        });
+    }
 
-    protected static <T extends Contract> RemoteCall<T> deployRemoteCall(
+    public static <T extends Contract> RemoteCall<T> deployRemoteCall(
             final Class<T> type,
             final Web3j web3j, final TransactionManager transactionManager,
             final BigInteger gasPrice, final BigInteger gasLimit,
@@ -497,7 +512,7 @@ public abstract class Contract extends ManagedTransaction {
         });
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(
+    protected static <T extends Contract> RemoteCall<T> deployRemoteCall(
             Class<T> type,
             Web3j web3j, TransactionManager transactionManager,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -512,20 +527,30 @@ public abstract class Contract extends ManagedTransaction {
             final Web3j web3j, final TransactionManager transactionManager,
             final ContractGasProvider contractGasProvider,
             final String binary, final String encodedConstructor, final BigInteger value) {
-        return deployRemoteCall(
+        return new RemoteCall<T>(new Callable<T>() {
+            @Override
+            public T call() throws Exception {
+                return deploy(
                         type, web3j, transactionManager, contractGasProvider, binary,
                         encodedConstructor, value);
             }
+        });
+    }
 
     public static <T extends Contract> RemoteCall<T> deployRemoteCall(
-            Class<T> type,
-            Web3j web3j, TransactionManager transactionManager,
-            ContractGasProvider contractGasProvider,
-            String binary, String encodedConstructor) {
-        return deployRemoteCall(
+            final Class<T> type,
+            final Web3j web3j, final TransactionManager transactionManager,
+            final ContractGasProvider contractGasProvider,
+            final String binary, final String encodedConstructor) {
+        return new RemoteCall<T>(new Callable<T>() {
+            @Override
+            public T call() throws Exception {
+                return deploy(
                         type, web3j, transactionManager, contractGasProvider, binary,
                         encodedConstructor, BigInteger.ZERO);
             }
+        });
+    }
 
     public static EventValues staticExtractEventParameters(
             Event event, Log log) {

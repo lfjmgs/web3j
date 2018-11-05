@@ -11,12 +11,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 import org.hamcrest.CoreMatchers;
+import io.reactivex.disposables.Disposable;
 import org.junit.Before;
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Action1;
 
 import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
@@ -51,8 +52,7 @@ public abstract class FilterTester {
         web3j = Web3jFactory.build(web3jService, 1000, scheduledExecutorService);
     }
 
-    @SuppressWarnings("unchecked")
-    <T> void runTest(EthLog ethLog, Observable<T> observable) throws Exception {
+    <T> void runTest(EthLog ethLog, Flowable<T> flowable) throws Exception {
         EthFilter ethFilter = objectMapper.readValue(
                 "{\n"
                         + "  \"id\":1,\n"
@@ -65,7 +65,7 @@ public abstract class FilterTester {
 
         EthLog notFoundFilter = objectMapper.readValue(
                 "{\"jsonrpc\":\"2.0\",\"id\":1,"
-                + "\"error\":{\"code\":-32000,\"message\":\"filter not found\"}}",
+                        + "\"error\":{\"code\":-32000,\"message\":\"filter not found\"}}",
                 EthLog.class);
 
         @SuppressWarnings("unchecked")
@@ -79,38 +79,38 @@ public abstract class FilterTester {
         when(web3jService.send(any(Request.class), eq(EthFilter.class)))
                 .thenReturn(ethFilter);
         when(web3jService.send(any(Request.class), eq(EthLog.class)))
-            .thenReturn(ethLog).thenReturn(notFoundFilter).thenReturn(ethLog);
+                .thenReturn(ethLog).thenReturn(notFoundFilter).thenReturn(ethLog);
         when(web3jService.send(any(Request.class), eq(EthUninstallFilter.class)))
                 .thenReturn(ethUninstallFilter);
 
-        Subscription subscription = observable.subscribe(
-                new Action1<T>() {
+        Disposable subscription = flowable.subscribe(new Consumer<T>() {
+                                                         @Override
+                                                         public void accept(T result) throws Exception {
+                                                             results.add(result);
+                                                             transactionLatch.countDown();
+                                                         }
+                                                     },
+                new Consumer<Throwable>() {
                     @Override
-                    public void call(T result) {
-                        results.add(result);
-                        transactionLatch.countDown();
-                    }
-                },
-                new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) throws Exception {
                         fail(throwable.getMessage());
                     }
                 },
-                new Action0() {
+                new Action() {
                     @Override
-                    public void call() {
+                    public void run() throws Exception {
                         completedLatch.countDown();
                     }
-                });
+                }
+        );
 
         transactionLatch.await(1, TimeUnit.SECONDS);
-        assertThat(results, CoreMatchers.<Set<T>>equalTo(new HashSet<T>(expected)));
+        assertThat(results, equalTo(new HashSet<>(expected)));
 
-        subscription.unsubscribe();
+        subscription.dispose();
 
         completedLatch.await(1, TimeUnit.SECONDS);
-        assertTrue(subscription.isUnsubscribed());
+        assertTrue(subscription.isDisposed());
     }
 
     @SuppressWarnings("unchecked")

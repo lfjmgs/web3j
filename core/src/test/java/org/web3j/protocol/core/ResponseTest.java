@@ -913,7 +913,6 @@ public class ResponseTest extends ResponseTester {
         assertThat(transaction.getChainId(), equalTo(10000000000L));
     }
 
-
     @Test
     public void testEthTransactionNull() {
         buildResponse(

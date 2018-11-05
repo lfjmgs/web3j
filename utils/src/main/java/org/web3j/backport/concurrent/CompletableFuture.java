@@ -1,12 +1,13 @@
-package org.web3j;
+package org.web3j.backport.concurrent;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-// TODO: remove this, Sam!
-public class TempCompletableFuture<V> implements Future<V> {
+// TODO[CompletableFuture]: Provide a suitable replacement for this class.
+public class CompletableFuture<V> implements Future<V> {
+
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
         return false;
@@ -36,5 +37,9 @@ public class TempCompletableFuture<V> implements Future<V> {
     }
 
     public void complete(Object reply) {
+    }
+
+    public CompletableFuture<V> thenAccept(Runnable runnable) {
+        return this;
     }
 }

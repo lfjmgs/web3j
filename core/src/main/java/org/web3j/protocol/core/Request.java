@@ -6,9 +6,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
-import rx.Observable;
+import io.reactivex.Flowable;
 
 import org.web3j.protocol.Web3jService;
+
 
 public class Request<S, T extends Response> {
     private static AtomicLong nextId = new AtomicLong(0);
@@ -76,12 +77,12 @@ public class Request<S, T extends Response> {
         return  web3jService.sendAsync(this, responseType);
     }
 
-    public Observable<T> observable() {
+    public Flowable<T> flowable() {
         return new RemoteCall<T>(new Callable<T>() {
             @Override
             public T call() throws Exception {
                 return Request.this.send();
             }
-        }).observable();
+        }).flowable();
     }
 }

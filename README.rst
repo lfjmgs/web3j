@@ -124,7 +124,7 @@ Java 8:
    <dependency>
      <groupId>org.web3j</groupId>
      <artifactId>core</artifactId>
-     <version>3.5.0</version>
+     <version>4.0.0</version>
    </dependency>
 
 Android:
@@ -134,9 +134,8 @@ Android:
    <dependency>
      <groupId>org.web3j</groupId>
      <artifactId>core</artifactId>
-     <version>3.3.1-android</version>
+     <version>3.1.1-android</version>
    </dependency>
-
 
 Gradle
 ------
@@ -145,13 +144,13 @@ Java 8:
 
 .. code-block:: groovy
 
-   compile ('org.web3j:core:3.5.0')
+   compile ('org.web3j:core:4.0.0')
 
 Android:
 
 .. code-block:: groovy
 
-   compile ('org.web3j:core:3.3.1-android')
+   compile ('org.web3j:core:3.1.1-android')
 
 
 Start a client
@@ -203,12 +202,12 @@ To send asynchronous requests using a CompletableFuture (Future on Android):
    Web3ClientVersion web3ClientVersion = web3.web3ClientVersion().sendAsync().get();
    String clientVersion = web3ClientVersion.getWeb3ClientVersion();
 
-To use an RxJava Observable:
+To use an RxJava Flowable:
 
 .. code-block:: java
 
    Web3j web3 = Web3j.build(new HttpService());  // defaults to http://localhost:8545/
-   web3.web3ClientVersion().observable().subscribe(x -> {
+   web3.web3ClientVersion().flowable().subscribe(x -> {
        String clientVersion = x.getWeb3ClientVersion();
        ...
    });
@@ -257,7 +256,7 @@ Then generate the wrapper code using web3j's `Command line tools`_:
 
 .. code-block:: bash
 
-   web3j solidity generate /path/to/<smart-contract>.bin /path/to/<smart-contract>.abi -o /path/to/src/main/java -p com.your.organisation.name
+   web3j solidity generate -b /path/to/<smart-contract>.bin -a /path/to/<smart-contract>.abi -o /path/to/src/main/java -p com.your.organisation.name
 
 Now you can create and deploy your smart contract:
 
@@ -309,14 +308,6 @@ To call a smart contract:
 
    Type result = contract.someMethod(<param1>, ...).send();
 
-To fine control your gas price:
-
-.. code-block:: java
-
-    contract.setGasProvider(new DefaultGasProvider() {
-            ...
-            });
-
 For more information refer to `Smart Contracts <http://docs.web3j.io/smart_contracts.html#solidity-smart-contract-wrappers>`_.
 
 
@@ -330,7 +321,7 @@ To receive all new blocks as they are added to the blockchain:
 
 .. code-block:: java
 
-   Subscription subscription = web3j.blockObservable(false).subscribe(block -> {
+   Subscription subscription = web3j.blockFlowable(false).subscribe(block -> {
        ...
    });
 
@@ -338,7 +329,7 @@ To receive all new transactions as they are added to the blockchain:
 
 .. code-block:: java
 
-   Subscription subscription = web3j.transactionObservable().subscribe(tx -> {
+   Subscription subscription = web3j.transactionFlowable().subscribe(tx -> {
        ...
    });
 
@@ -347,7 +338,7 @@ been grouped into a block together):
 
 .. code-block:: java
 
-   Subscription subscription = web3j.pendingTransactionObservable().subscribe(tx -> {
+   Subscription subscription = web3j.pendingTransactionFlowable().subscribe(tx -> {
        ...
    });
 
@@ -355,13 +346,13 @@ Or, if you'd rather replay all blocks to the most current, and be notified of ne
 blocks being created:
 
 .. code-block:: java
-   Subscription subscription = catchUpToLatestAndSubscribeToNewBlocksObservable(
+   Subscription subscription = replayPastAndFutureBlocksFlowable(
            <startBlockNumber>, <fullTxObjects>)
            .subscribe(block -> {
                ...
    });
 
-There are a number of other transaction and block replay Observables described in the
+There are a number of other transaction and block replay Flowables described in the
 `docs <http://docs.web3j.io/filters.html>`_.
 
 Topic filters are also supported:
@@ -371,7 +362,7 @@ Topic filters are also supported:
    EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST,
            DefaultBlockParameterName.LATEST, <contract-address>)
                 .addSingleTopic(...)|.addOptionalTopics(..., ...)|...;
-   web3j.ethLogObservable(filter).subscribe(log -> {
+   web3j.ethLogFlowable(filter).subscribe(log -> {
        ...
    });
 
@@ -434,7 +425,7 @@ Using an Ethereum client's admin commands (make sure you have your wallet in the
 keystore):
 
 .. code-block:: java
-
+  		
    Admin web3j = Admin.build(new HttpService());  // defaults to http://localhost:8545/
    PersonalUnlockAccount personalUnlockAccount = web3j.personalUnlockAccount("0x000...", "a password").sendAsync().get();
    if (personalUnlockAccount.accountUnlocked()) {
@@ -529,11 +520,6 @@ Please submit a pull request if you wish to include your project on the list:
 - `Trust Ethereum Wallet <https://github.com/TrustWallet/trust-wallet-android>`_
 - `Presto Ethereum <https://github.com/xiaoyao1991/presto-ethereum>`_
 - `Kundera-Ethereum data importer and sync utility <https://github.com/impetus-opensource/Kundera/tree/trunk/src/kundera-ethereum>`_ by `@impetus-opensource <https://github.com/impetus-opensource>`_
-- `Ethereum JDBC Connector <https://github.com/Impetus/eth-jdbc-connector/>`_ by `@impetus-opensource <https://github.com/impetus-opensource>`_
-- `Ethereum Tool <https://github.com/e-Contract/ethereum-tool>`_ for secure offline key management.
-- `Ethereum Java EE JCA Resource Adapter <https://github.com/e-Contract/ethereum-resource-adapter>`_ provides integration of Ethereum within Java EE 6+.
-- `Apache Camel Ethereum Component <https://github.com/apache/camel/blob/master/components/camel-web3j/src/main/docs/web3j-component.adoc>`_ by `@bibryam <https://github.com/bibryam/>`_.
-
 
 
 Companies using web3j
@@ -550,7 +536,6 @@ Please submit a pull request if you wish to include your company on the list:
 - `Pactum <https://pactum.io/>`_
 - `TrustWallet <http://trustwalletapp.com>`_
 - `Impetus <http://www.impetus.com/>`_
-- `Argent Labs <http://www.argent.im/>`_
 
 
 Build instructions
@@ -576,7 +561,7 @@ To run the integration tests:
 Snapshot Dependencies
 ---------------------
 
-Snapshot versions of web3j follow the ``<major>.<minor>.<build>-SNAPSHOT`` convention, for example: 3.6.0-SNAPSHOT.
+Snapshot versions of web3j follow the ``<major>.<minor>.<build>-SNAPSHOT`` convention, for example: 4.0.0-SNAPSHOT.
 
 | If you would like to use snapshots instead please add a new maven repository pointing to:
 

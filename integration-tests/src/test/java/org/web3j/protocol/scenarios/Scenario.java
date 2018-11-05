@@ -1,19 +1,29 @@
 package org.web3j.protocol.scenarios;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Optional;
+
 import org.junit.Before;
+
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.admin.Admin;
-import org.web3j.protocol.admin.AdminFactory;
 import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.utils.Files;
 
@@ -31,8 +41,8 @@ import static junit.framework.TestCase.fail;
  */
 public class Scenario {
 
-    static final BigInteger GAS_PRICE = BigInteger.valueOf(22000000000L);
-    static final BigInteger GAS_LIMIT = BigInteger.valueOf(4300000);
+    static final BigInteger GAS_PRICE = BigInteger.valueOf(22_000_000_000L);
+    static final BigInteger GAS_LIMIT = BigInteger.valueOf(4_300_000);
     static final StaticGasProvider STATIC_GAS_PROVIDER =
             new StaticGasProvider(GAS_PRICE, GAS_LIMIT);
 

@@ -1,6 +1,8 @@
 package org.web3j.crypto;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +56,7 @@ public class MnemonicUtilsTest {
 
     private static String readAllLinesWithDeliminator(
             String path, String delimiter) throws IOException {
-        return Strings.join(MnemonicUtils.readAllLines(path), delimiter);
+        return Strings.join(MnemonicUtils.readAllLines(new FileInputStream(new File(path))), delimiter);
     }
 
     /**

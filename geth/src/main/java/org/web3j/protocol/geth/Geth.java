@@ -1,5 +1,8 @@
 package org.web3j.protocol.geth;
 
+import io.reactivex.Flowable;
+
+import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.admin.Admin;
 import org.web3j.protocol.admin.methods.response.BooleanResponse;
 import org.web3j.protocol.admin.methods.response.PersonalSign;
@@ -9,7 +12,6 @@ import org.web3j.protocol.geth.response.PersonalEcRecover;
 import org.web3j.protocol.geth.response.PersonalImportRawKey;
 import org.web3j.protocol.websocket.events.PendingTransactionNotification;
 import org.web3j.protocol.websocket.events.SyncingNotfication;
-import rx.Observable;
 
 /**
  * JSON-RPC Request object building factory for Geth. 
@@ -29,18 +31,19 @@ public interface Geth extends Admin {
     Request<?, BooleanResponse> minerStop();
 
     /**
-     * Creates an observable that emits a notification when a new transaction is added
-     * to the pending state and is signed with a key that is available in the node.
+     * Creates an {@link Flowable} instance that emits a notification when a new transaction is
+     * added to the pending state and is signed with a key that is available in the node.
      *
-     * @return Observable that emits a notification when a new transaction is added
-     *         to the pending state
+     * @return a {@link Flowable} instance that emits a notification when a new transaction is
+     *         added to the pending state
      */
-    Observable<PendingTransactionNotification> newPendingTransactionsNotifications();
+    Flowable<PendingTransactionNotification> newPendingTransactionsNotifications();
 
     /**
-     * Creates an observable that emits a notification when a node starts or stops syncing.
-     * @return Observalbe that emits changes to syncing status
+     * Creates an {@link Flowable} instance that emits a notification when a node starts or stops
+     * syncing.
+     * @return a {@link Flowable} instance that emits changes to syncing status
      */
-    Observable<SyncingNotfication> syncingStatusNotifications();
+    Flowable<SyncingNotfication> syncingStatusNotifications();
 
 }

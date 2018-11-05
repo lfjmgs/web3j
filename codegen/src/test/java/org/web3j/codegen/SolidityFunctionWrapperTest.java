@@ -151,10 +151,10 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     public void testBuildFunctionTransaction() throws Exception {
         AbiDefinition functionDefinition = new AbiDefinition(
                 false,
-                Arrays.<AbiDefinition.NamedType>asList(
+                Arrays.asList(
                         new AbiDefinition.NamedType("param", "uint8")),
                 "functionName",
-                Collections.<AbiDefinition.NamedType>emptyList(),
+                Collections.emptyList(),
                 "type",
                 false);
 
@@ -199,10 +199,10 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     public void testBuildPayableFunctionTransaction() throws Exception {
         AbiDefinition functionDefinition = new AbiDefinition(
                 false,
-                Arrays.<AbiDefinition.NamedType>asList(
+                Arrays.asList(
                         new AbiDefinition.NamedType("param", "uint8")),
                 "functionName",
-                Collections.<AbiDefinition.NamedType>emptyList(),
+                Collections.emptyList(),
                 "type",
                 true);
 
@@ -254,7 +254,7 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition = new AbiDefinition(
                 true,
                 Arrays.asList(
-                    new AbiDefinition.NamedType("param", "uint8")),
+                        new AbiDefinition.NamedType("param", "uint8")),
                 "functionName",
                 Arrays.asList(
                         new AbiDefinition.NamedType("result", "address[]")),
@@ -266,19 +266,19 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         //CHECKSTYLE:OFF
         String expected =
                 "public org.web3j.protocol.core.RemoteCall<java.util.List> functionName(java.math.BigInteger param) {\n"
-                + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_FUNCTIONNAME, \n"
-                + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.Uint8(param)), \n"
-                + "      java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.Address>>() {}));\n"
-                + "  return new org.web3j.protocol.core.RemoteCall<java.util.List>(\n"
-                + "      new java.util.concurrent.Callable<java.util.List>() {\n"
-                + "        @java.lang.Override\n"
-                + "        @java.lang.SuppressWarnings(\"unchecked\")\n"
-                + "        public java.util.List call() throws java.lang.Exception {\n"
-                + "          java.util.List<org.web3j.abi.datatypes.Type> result = (java.util.List<org.web3j.abi.datatypes.Type>) executeCallSingleValueReturn(function, java.util.List.class);\n"
-                + "          return convertToNative(result);\n"
-                + "        }\n"
-                + "      });\n"
-                + "}\n";
+                        + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_FUNCTIONNAME, \n"
+                        + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.Uint8(param)), \n"
+                        + "      java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.Address>>() {}));\n"
+                        + "  return new org.web3j.protocol.core.RemoteCall<java.util.List>(\n"
+                        + "      new java.util.concurrent.Callable<java.util.List>() {\n"
+                        + "        @java.lang.Override\n"
+                        + "        @java.lang.SuppressWarnings(\"unchecked\")\n"
+                        + "        public java.util.List call() throws java.lang.Exception {\n"
+                        + "          java.util.List<org.web3j.abi.datatypes.Type> result = (java.util.List<org.web3j.abi.datatypes.Type>) executeCallSingleValueReturn(function, java.util.List.class);\n"
+                        + "          return convertToNative(result);\n"
+                        + "        }\n"
+                        + "      });\n"
+                        + "}\n";
         //CHECKSTYLE:ON
 
         assertThat(methodSpec.toString(), is(expected));
@@ -288,10 +288,10 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     public void testBuildFunctionConstantInvalid() throws Exception {
         AbiDefinition functionDefinition = new AbiDefinition(
                 true,
-                Arrays.<AbiDefinition.NamedType>asList(
+                Arrays.asList(
                         new AbiDefinition.NamedType("param", "uint8")),
                 "functionName",
-                Collections.<AbiDefinition.NamedType>emptyList(),
+                Collections.emptyList(),
                 "type",
                 false);
 
@@ -300,8 +300,8 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         //CHECKSTYLE:OFF
         String expected =
                 "public void functionName(java.math.BigInteger param) {\n"
-                + "  throw new RuntimeException(\"cannot call constant function with void return type\");\n"
-                + "}\n";
+                        + "  throw new RuntimeException(\"cannot call constant function with void return type\");\n"
+                        + "}\n";
         //CHECKSTYLE:ON
 
         assertThat(methodSpec.toString(), is(expected));
@@ -361,7 +361,7 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
                 false,
                 Arrays.asList(id, fromAddress, toAddress, value, message),
                 "Transfer",
-                new ArrayList<AbiDefinition.NamedType>(),
+                new ArrayList<>(),
                 "event",
                 false);
         TypeSpec.Builder builder = TypeSpec.classBuilder("testClass");
@@ -390,10 +390,10 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
                         + "    return responses;\n"
                         + "  }\n"
                         + "\n"
-                        + "  public rx.Observable<TransferEventResponse> transferEventObservable(org.web3j.protocol.core.methods.request.EthFilter filter) {\n"
-                        + "    return web3j.ethLogObservable(filter).map(new rx.functions.Func1<org.web3j.protocol.core.methods.response.Log, TransferEventResponse>() {\n"
+                        + "  public io.reactivex.Flowable<TransferEventResponse> transferEventFlowable(org.web3j.protocol.core.methods.request.EthFilter filter) {\n"
+                        + "    return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<org.web3j.protocol.core.methods.response.Log, TransferEventResponse>() {\n"
                         + "      @java.lang.Override\n"
-                        + "      public TransferEventResponse call(org.web3j.protocol.core.methods.response.Log log) {\n"
+                        + "      public TransferEventResponse apply(org.web3j.protocol.core.methods.response.Log log) {\n"
                         + "        org.web3j.tx.Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(TRANSFER_EVENT, log);\n"
                         + "        TransferEventResponse typedResponse = new TransferEventResponse();\n"
                         + "        typedResponse.log = log;\n"
@@ -407,10 +407,10 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
                         + "    });\n"
                         + "  }\n"
                         + "\n"
-                        + "  public rx.Observable<TransferEventResponse> transferEventObservable(org.web3j.protocol.core.DefaultBlockParameter startBlock, org.web3j.protocol.core.DefaultBlockParameter endBlock) {\n"
+                        + "  public io.reactivex.Flowable<TransferEventResponse> transferEventFlowable(org.web3j.protocol.core.DefaultBlockParameter startBlock, org.web3j.protocol.core.DefaultBlockParameter endBlock) {\n"
                         + "    org.web3j.protocol.core.methods.request.EthFilter filter = new org.web3j.protocol.core.methods.request.EthFilter(startBlock, endBlock, getContractAddress());\n"
                         + "    filter.addSingleTopic(org.web3j.abi.EventEncoder.encode(TRANSFER_EVENT));\n"
-                        + "    return transferEventObservable(filter);\n"
+                        + "    return transferEventFlowable(filter);\n"
                         + "  }\n"
                         + "\n"
                         + "  public static class TransferEventResponse {\n"

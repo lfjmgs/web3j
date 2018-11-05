@@ -37,9 +37,8 @@ public class FunctionWrappersIT extends Scenario {
     @Test
     public void testFibonacciNotify() throws Exception {
         Fibonacci fibonacci = Fibonacci.load(
-                "0x3c05b2564139fb55820b18b72e94b2178eaace7d",
-                Web3jFactory.build(new HttpService()),
-                ALICE, GAS_PRICE, GAS_LIMIT);
+                "0x3c05b2564139fb55820b18b72e94b2178eaace7d", Web3j.build(new HttpService()),
+                ALICE, STATIC_GAS_PROVIDER);
 
         TransactionReceipt transactionReceipt = fibonacci.fibonacciNotify(
                 BigInteger.valueOf(15)).send();

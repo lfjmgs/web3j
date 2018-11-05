@@ -1,13 +1,12 @@
 package org.web3j.crypto;
 
 import java.io.File;
+import java.nio.file.Files;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import org.web3j.utils.Numeric;
 
@@ -26,16 +25,10 @@ import static org.web3j.crypto.WalletUtils.isValidPrivateKey;
 public class WalletUtilsTest {
 
     private File tempDir;
-    protected String tempDirPath;
-
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
 
     @Before
     public void setUp() throws Exception {
-        tempDir = folder.newFolder(
-                WalletUtilsTest.class.getSimpleName() + "-testkeys");
-        tempDirPath = tempDir.getPath();
+        tempDir = createTempDir();
     }
 
     @After
@@ -116,8 +109,8 @@ public class WalletUtilsTest {
                 PASSWORD,
                 WalletUtilsTest.class.getResource(
                         "/keyfiles/"
-                        + "UTC--2016-11-03T05-55-06."
-                        + "340672473Z--ef678007d18427e6022059dbc264f27507cd1ffc").getFile());
+                                + "UTC--2016-11-03T05-55-06."
+                                + "340672473Z--ef678007d18427e6022059dbc264f27507cd1ffc").getFile());
 
         assertThat(credentials, equalTo(CREDENTIALS));
     }
@@ -129,8 +122,8 @@ public class WalletUtilsTest {
                 PASSWORD,
                 new File(WalletUtilsTest.class.getResource(
                         "/keyfiles/"
-                        + "UTC--2016-11-03T07-47-45."
-                        + "988Z--4f9c1a1efaa7d81ba1cabf07f2c3a5ac5cf4f818").getFile()));
+                                + "UTC--2016-11-03T07-47-45."
+                                + "988Z--4f9c1a1efaa7d81ba1cabf07f2c3a5ac5cf4f818").getFile()));
 
         assertThat(credentials, equalTo(
                 Credentials.create(
@@ -156,6 +149,12 @@ public class WalletUtilsTest {
         assertTrue(WalletUtils.getRinkebyKeyDirectory()
                 .endsWith(String.format("%srinkeby%skeystore", File.separator, File.separator)));
 
+    }
+
+
+    static File createTempDir() throws Exception {
+        return Files.createTempDirectory(
+                WalletUtilsTest.class.getSimpleName() + "-testkeys").toFile();
     }
 
     @Test

@@ -1,23 +1,18 @@
 package org.web3j.crypto;
 
-import java.math.BigInteger;
-import java.security.SignatureException;
-import java.util.Arrays;
-
 import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.asn1.x9.X9IntegerConverter;
-import org.spongycastle.crypto.digests.SHA256Digest;
 import org.spongycastle.crypto.ec.CustomNamedCurves;
 import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.crypto.params.ECPrivateKeyParameters;
-import org.spongycastle.crypto.signers.ECDSASigner;
-import org.spongycastle.crypto.signers.HMacDSAKCalculator;
 import org.spongycastle.math.ec.ECAlgorithms;
 import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.math.ec.FixedPointCombMultiplier;
 import org.spongycastle.math.ec.custom.sec.SecP256K1Curve;
-
 import org.web3j.utils.Numeric;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
+import java.util.Arrays;
 
 import static org.web3j.utils.Assertions.verifyPrecondition;
 
@@ -34,6 +29,26 @@ public class Sign {
     static final ECDomainParameters CURVE = new ECDomainParameters(
             CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
     static final BigInteger HALF_CURVE_ORDER = CURVE_PARAMS.getN().shiftRight(1);
+
+    static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
+
+    static byte[] getEthereumMessagePrefix(int messageLength) {
+        return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
+    }
+
+    static byte[] getEthereumMessageHash(byte[] message) {
+        byte[] prefix = getEthereumMessagePrefix(message.length);
+
+        byte[] result = new byte[prefix.length + message.length];
+        System.arraycopy(prefix, 0, result, 0, prefix.length);
+        System.arraycopy(message, 0, result, prefix.length, message.length);
+
+        return Hash.sha3(result);
+    }
+
+    public static SignatureData signPrefixedMessage(byte[] message, ECKeyPair keyPair) {
+        return signMessage(getEthereumMessageHash(message), keyPair, false);
+    }
 
     public static SignatureData signMessage(byte[] message, ECKeyPair keyPair) {
         return signMessage(message, keyPair, true);
@@ -174,6 +189,27 @@ public class Sign {
      */
     public static BigInteger signedMessageToKey(
             byte[] message, SignatureData signatureData) throws SignatureException {
+        return signedMessageHashToKey(Hash.sha3(message), signatureData);
+    }
+
+    /**
+     * Given an arbitrary message and an Ethereum message signature encoded in bytes,
+     * returns the public key that was used to sign it. This can then be compared to the
+     * expected public key to determine if the signature was correct.
+     *
+     * @param message The message.
+     * @param signatureData The message signature components
+     * @return the public key used to sign the message
+     * @throws SignatureException If the public key could not be recovered or if there was a
+     *     signature format error.
+     */
+    public static BigInteger signedPrefixedMessageToKey(
+            byte[] message, SignatureData signatureData) throws SignatureException {
+        return signedMessageHashToKey(getEthereumMessageHash(message), signatureData);
+    }
+
+    static BigInteger signedMessageHashToKey(
+            byte[] messageHash, SignatureData signatureData) throws SignatureException {
 
         byte[] r = signatureData.getR();
         byte[] s = signatureData.getS();
@@ -191,7 +227,6 @@ public class Sign {
                 new BigInteger(1, signatureData.getR()),
                 new BigInteger(1, signatureData.getS()));
 
-        byte[] messageHash = Hash.sha3(message);
         int recId = header - 27;
         BigInteger key = recoverFromSignature(recId, sig, messageHash);
         if (key == null) {
@@ -215,8 +250,11 @@ public class Sign {
 
     /**
      * Returns public key point from the given private key.
+     *
+     * @param privKey the private key to derive the public key from
+     * @return ECPoint public key
      */
-    private static ECPoint publicPointFromPrivate(BigInteger privKey) {
+    public static ECPoint publicPointFromPrivate(BigInteger privKey) {
         /*
          * TODO: FixedPointCombMultiplier currently doesn't support scalars longer than the group
          * order, but that could change in future versions.
@@ -225,6 +263,16 @@ public class Sign {
             privKey = privKey.mod(CURVE.getN());
         }
         return new FixedPointCombMultiplier().multiply(CURVE.getG(), privKey);
+    }
+
+    /**
+     * Returns public key point from the given curve.
+     *
+     * @param bits representing the point on the curve
+     * @return BigInteger encoded public key
+     */
+    public static BigInteger publicFromPoint(byte[] bits) {
+        return new BigInteger(1, Arrays.copyOfRange(bits, 1, bits.length));  // remove prefix
     }
 
     public static class SignatureData {

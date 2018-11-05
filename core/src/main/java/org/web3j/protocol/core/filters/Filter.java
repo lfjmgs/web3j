@@ -35,7 +35,7 @@ public abstract class Filter<T> {
     private volatile BigInteger filterId;
 
     private ScheduledFuture<?> schedule;
-
+    
     private ScheduledExecutorService scheduledExecutorService;
 
     private long blockTime;
@@ -55,9 +55,12 @@ public abstract class Filter<T> {
             filterId = ethFilter.getFilterId();
             this.scheduledExecutorService = scheduledExecutorService;
             this.blockTime = blockTime;
-            // this runs in the caller thread as if any exceptions are encountered, we shouldn't
-            // proceed with creating the scheduled task below
-            getInitialFilterLogs();
+            scheduledExecutorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    Filter.this.getInitialFilterLogs();
+                }
+            });
 
             /*
             We want the filter to be resilient against client issues. On numerous occasions
@@ -135,7 +138,7 @@ public abstract class Filter<T> {
     abstract EthFilter sendRequest() throws IOException;
 
     abstract void process(List<EthLog.LogResult> logResults);
-
+    
     private void reinstallFilter() {
         log.warn("The filter has not been found. Filter id: " + filterId);
         schedule.cancel(true);
