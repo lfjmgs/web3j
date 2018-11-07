@@ -1241,7 +1241,7 @@ public class SolidityFunctionWrapper extends Generator {
             }
         }
 
-        final String asListParams = Collection.join(listParams, ",");
+        final String asListParams = Collection.join(listParams, ", ");
 
         return CodeBlock.builder()
                 .addStatement("new $T($S, \n"

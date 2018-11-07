@@ -375,7 +375,12 @@ public class JsonRpc2_0RxTest {
 
         List<EthBlock.TransactionResult> transactionResults = new ArrayList<EthBlock.TransactionResult>();
         for (Transaction transaction : transactions) {
-            transactionResults.add((EthBlock.TransactionResult) transaction);
+            transactionResults.add(new EthBlock.TransactionResult() {
+                @Override
+                public Object get() {
+                    return transaction;
+                }
+            });
         }
         block.setTransactions(transactionResults);
 
