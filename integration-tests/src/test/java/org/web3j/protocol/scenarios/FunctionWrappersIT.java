@@ -1,15 +1,13 @@
 package org.web3j.protocol.scenarios;
 
-import java.math.BigInteger;
-
-import org.hamcrest.core.IsEqual;
 import org.junit.Test;
-
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.generated.Fibonacci;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
+
+import java.math.BigInteger;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -37,7 +35,7 @@ public class FunctionWrappersIT extends Scenario {
     @Test
     public void testFibonacciNotify() throws Exception {
         Fibonacci fibonacci = Fibonacci.load(
-                "0x3c05b2564139fb55820b18b72e94b2178eaace7d", Web3j.build(new HttpService()),
+                "0x3c05b2564139fb55820b18b72e94b2178eaace7d", Web3jFactory.build(new HttpService()),
                 ALICE, STATIC_GAS_PROVIDER);
 
         TransactionReceipt transactionReceipt = fibonacci.fibonacciNotify(

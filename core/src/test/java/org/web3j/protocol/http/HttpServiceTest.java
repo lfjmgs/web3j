@@ -1,25 +1,16 @@
 package org.web3j.protocol.http;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import okhttp3.*;
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.mockito.Mockito;
-
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
-import org.web3j.protocol.core.methods.response.EthSubscribe;
 import org.web3j.protocol.exceptions.ClientConnectionException;
-import org.web3j.protocol.websocket.events.NewHeadsNotification;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertTrue;
 
@@ -94,19 +85,5 @@ public class HttpServiceTest {
         Assert.fail("No exception");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void subscriptionNotSupported() {
-        Request<Object, EthSubscribe> subscribeRequest = new Request<>(
-                "eth_subscribe",
-                Arrays.asList("newHeads", Collections.emptyMap()),
-                httpService,
-                EthSubscribe.class);
 
-        httpService.subscribe(
-                subscribeRequest,
-                "eth_unsubscribe",
-                NewHeadsNotification.class
-        );
-    }
-    
 }

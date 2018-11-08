@@ -82,28 +82,6 @@ public class FlowableIT {
                 Throwable::printStackTrace,
                 completedLatch::countDown);
 
-
-        Subscription subscription = observable.subscribe(
-                new Action1<T>() {
-                    @Override
-                    public void call(final T x) {
-                        countDownLatch.countDown();
-                    }
-                },
-                new Action1<Throwable>() {
-                    @Override
-                    public void call(final Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                },
-                new Action0() {
-                    @Override
-                    public void call() {
-                        completedLatch.countDown();
-                    }
-                }
-        );
-
         countDownLatch.await(TIMEOUT_MINUTES, TimeUnit.MINUTES);
         subscription.dispose();
         completedLatch.await(1, TimeUnit.SECONDS);

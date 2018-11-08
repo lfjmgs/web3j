@@ -1,22 +1,20 @@
 package org.web3j.protocol.scenarios;
 
-import java.math.BigInteger;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import org.junit.Test;
-
 import org.web3j.generated.HumanStandardToken;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import java.math.BigInteger;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.web3j.generated.HumanStandardToken.ApprovalEventResponse;
-import static org.web3j.generated.HumanStandardToken.TransferEventResponse;
-import static org.web3j.generated.HumanStandardToken.deploy;
+import static org.web3j.generated.HumanStandardToken.*;
 import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 /**
@@ -47,9 +45,9 @@ public class HumanStandardTokenGeneratedIT extends Scenario {
         Disposable transferEventSubscription = contract.transferEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST).subscribe(
-                new Action1<TransferEventResponse>() {
+                new Consumer<TransferEventResponse>() {
                     @Override
-                    public void call(TransferEventResponse transferEventResponse) {
+                    public void accept(TransferEventResponse transferEventResponse) throws Exception {
                         transferEventCountDownLatch.countDown();
                     }
                 }
@@ -59,9 +57,9 @@ public class HumanStandardTokenGeneratedIT extends Scenario {
         Disposable approvalEventSubscription = contract.approvalEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST).subscribe(
-                new Action1<ApprovalEventResponse>() {
+                new Consumer<ApprovalEventResponse>() {
                     @Override
-                    public void call(ApprovalEventResponse transferEventResponse) {
+                    public void accept(ApprovalEventResponse approvalEventResponse) throws Exception {
                         transferEventCountDownLatch.countDown();
                     }
                 }

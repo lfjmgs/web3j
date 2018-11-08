@@ -1,29 +1,18 @@
 package org.web3j.protocol.scenarios;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Optional;
-
 import org.junit.Before;
-
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.admin.Admin;
+import org.web3j.protocol.admin.AdminFactory;
 import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.utils.Files;
 
@@ -135,8 +124,8 @@ public class Scenario {
     Function createFibonacciFunction() {
         return new Function(
                 "fibonacciNotify",
-                Collections.<Type>singletonList(new Uint(BigInteger.valueOf(7))),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint>() {
+                Collections.singletonList(new Uint(BigInteger.valueOf(7))),
+                Collections.singletonList(new TypeReference<Uint>() {
                 }));
     }
 
